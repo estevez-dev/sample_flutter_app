@@ -1,6 +1,6 @@
 # sampleflutterapp
 
-A simple Flutter application
+A simple Flutter application [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/estevez-dev/sample_flutter_app) 
 
 ## Getting Started
 
