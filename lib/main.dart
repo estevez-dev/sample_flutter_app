@@ -1,193 +1,177 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:workmanager/workmanager.dart' as workManager;
-import 'package:geolocator/geolocator.dart';
-import 'package:battery/battery.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
-void main() => runApp(SampleApp());
-
-class SampleApp extends StatefulWidget {
-  @override
-  _SampleAppState createState() => new _SampleAppState();
-  
+void main() {
+  runApp(MyApp());
 }
 
-class _SampleAppState extends State<SampleApp> {
-
-  @override
-  void initState() {
-    workManager.Workmanager.initialize(
-      updateDeviceLocation,
-      isInDebugMode: false
-    );
-    super.initState();
-  }
-
-
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // Notice that the counter didn't reset back to zero; the application
+        // is not restarted.
         primarySwatch: Colors.blue,
+        // This makes the visual density adapt to the platform that you run
+        // the app on. For desktop platforms, the controls will be smaller and
+        // closer together (more dense) than on mobile platforms.
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: DefaultTabController(length: 3, child: LightCard()),
     );
   }
-
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
+class LightCard extends StatefulWidget {
+  LightCard({
+    Key key,
+  }) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<StatefulWidget> createState() {
+    return _LightCardState();
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  String _msg = 'Background task not started yet';
+class _LightCardState extends State<LightCard> {
+  int _value = 10;
 
-  void _startBackgroudTask() async {
-    await workManager.Workmanager.registerPeriodicTask(
-          "sampleBackgroundTask",
-          "sampleBackgroundTask-01",
-          inputData: {
-            "webhookId": 'jsgiuerngierjg',
-            "httpWebHost": 'example.com'
-          },
-          frequency: Duration(minutes: 20),
-          existingWorkPolicy: workManager.ExistingWorkPolicy.replace,
-          backoffPolicy: workManager.BackoffPolicy.linear,
-          backoffPolicyDelay: Duration(minutes: 20),
-          constraints: workManager.Constraints(
-            networkType: workManager.NetworkType.connected,
-          ),
-        );
-    setState(() {
-      _msg = 'Background task started. Tap the button.';
-    });
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'This is the message:',
-            ),
-            Text(
-              '$_msg',
-              style: Theme.of(context).textTheme.display1,
-            ),
+        bottom: TabBar(
+          tabs: [
+            Tab(icon: Icon(Icons.directions_car)),
+            Tab(icon: Icon(Icons.directions_transit)),
+            Tab(icon: Icon(Icons.directions_bike)),
           ],
         ),
+        title: Text('Tabs Demo'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _startBackgroudTask,
-        tooltip: 'Start',
-        child: Icon(Icons.launch),
+      body: TabBarView(
+        children: <Widget>[
+          SingleChildScrollView(
+            child: Card(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  ConstrainedBox(
+                      constraints: BoxConstraints.loose(Size(200, 200)),
+                      child: AspectRatio(
+                          aspectRatio: 1,
+                          child: SfRadialGauge(
+                            axes: <RadialAxis>[
+                              RadialAxis(
+                                  onAxisTapped: (val) {
+                                    print('gauge tapped');
+                                  },
+                                  maximum: 255,
+                                  minimum: 0,
+                                  showLabels: false,
+                                  showTicks: false,
+                                  axisLineStyle: AxisLineStyle(
+                                      thickness: 0.05,
+                                      thicknessUnit: GaugeSizeUnit.factor,
+                                      color: Colors.grey),
+                                  pointers: <GaugePointer>[
+                                    RangePointer(
+                                      value: 30,
+                                      sizeUnit: GaugeSizeUnit.factor,
+                                      width: 0.05,
+                                      color: Colors.yellow,
+                                      enableAnimation: true,
+                                      animationType: AnimationType.bounceOut,
+                                    ),
+                                    MarkerPointer(
+                                        value: 30,
+                                        markerType: MarkerType.circle,
+                                        markerHeight: 20,
+                                        markerWidth: 20,
+                                        enableDragging: true,
+                                        color: Colors.red
+                                        //enableAnimation: true,
+                                        //animationType: AnimationType.bounceOut,
+                                        )
+                                  ])
+                            ],
+                          ))),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.lightBlue,
+                    ),
+                  ),
+                  Container(
+                    height: 200,
+                    child: Slider(
+                        value: _value.toDouble(),
+                        min: 1.0,
+                        max: 10.0,
+                        divisions: 10,
+                        activeColor: Colors.red,
+                        inactiveColor: Colors.black,
+                        label: 'Set a value',
+                        onChanged: (double newValue) {
+                          setState(() {
+                            _value = newValue.round();
+                          });
+                        }),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.lightBlue,
+                    ),
+                  ),
+                  Container(
+                    height: 200,
+                    child: Slider(
+                        value: _value.toDouble(),
+                        min: 1.0,
+                        max: 10.0,
+                        divisions: 10,
+                        activeColor: Colors.red,
+                        inactiveColor: Colors.black,
+                        label: 'Set a value',
+                        onChanged: (double newValue) {
+                          setState(() {
+                            _value = newValue.round();
+                          });
+                        }),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.yellow,
+          ),
+          Container(
+            color: Colors.red,
+          )
+        ],
       ),
     );
   }
-}
-
-void updateDeviceLocation() {
-  workManager.Workmanager.executeTask((backgroundTask, data) async {
-    print("[Background $backgroundTask] Started");
-    Geolocator geolocator = Geolocator();
-    var battery = Battery();
-    String webhookId = data["webhookId"];
-    String httpWebHost = data["httpWebHost"];
-    String logData = '==> ${DateTime.now()} [Background $backgroundTask]:';
-    print("[Background $backgroundTask] Getting path for log file...");
-    final logFileDirectory = await getExternalStorageDirectory();
-    print("[Background $backgroundTask] Opening log file...");
-    File logFile = File('${logFileDirectory.path}/sample-background-log.txt');
-    print("[Background $backgroundTask] Log file path: ${logFile.path}");
-    if (webhookId != null && webhookId.isNotEmpty) {
-      String url = "$httpWebHost/api/webhook/$webhookId";
-      Map<String, String> headers = {};
-      headers["Content-Type"] = "application/json";
-      Map data = {
-        "type": "update_location",
-        "data": {
-          "gps": [],
-          "gps_accuracy": 0,
-          "battery": 100
-        }
-      };
-      print("[Background $backgroundTask] Getting battery level...");
-      int batteryLevel;
-      try {
-        batteryLevel = await battery.batteryLevel;
-        print("[Background $backgroundTask] Got battery level: $batteryLevel");
-      } catch(e) {
-        print("[Background $backgroundTask] Error getting battery level: $e. Setting zero");
-        batteryLevel = 0;
-        logData += 'Battery: error, $e';
-      }
-      if (batteryLevel != null) {
-        data["data"]["battery"] = batteryLevel;
-        logData += 'Battery: success, $batteryLevel';
-      } else {
-        logData += 'Battery: error, level is null';
-      }
-      Position location;
-      try {
-        location = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, locationPermissionLevel: GeolocationPermission.locationAlways);
-        if (location != null && location.latitude != null) {
-          logData += ' || Location: success, ${location.latitude} ${location.longitude} (${location.timestamp})';
-          data["data"]["gps"] = [location.latitude, location.longitude];
-          data["data"]["gps_accuracy"] = location.accuracy;
-          try {
-            http.Response response = await http.post(
-                url,
-                headers: headers,
-                body: json.encode(data)
-            );
-            if (response.statusCode >= 200 && response.statusCode < 300) {
-              logData += ' || Post: success, ${response.statusCode}';
-            } else {
-              logData += ' || Post: error, ${response.statusCode}';
-            }
-          } catch(e) {
-            logData += ' || Post: error, $e';
-          }
-        } else {
-          logData += ' || Location: error, location is null';
-        }
-      } catch (e) {
-        print("[Background $backgroundTask] Location error: $e");
-        logData += ' || Location: error, $e';
-      }
-    } else {
-      logData += 'Not configured';
-    }
-    print("[Background $backgroundTask] Writing log data...");
-    try {
-      var fileMode;
-      if (logFile.existsSync() && logFile.lengthSync() < 5000000) {
-        fileMode = FileMode.append;
-      } else {
-        fileMode = FileMode.write;
-      }
-      await logFile.writeAsString('$logData\n', mode: fileMode);
-    } catch (e) {
-      print("[Background $backgroundTask] Error writing log: $e");
-    }
-    print("[Background $backgroundTask] Finished.");
-    return true;
-  });
 }
